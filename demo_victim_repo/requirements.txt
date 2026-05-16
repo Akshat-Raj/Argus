@@ -1,0 +1,14 @@
+# Python dependencies for demo-ai-service
+# ⚠️  This file contains intentional supply chain vulnerabilities for demonstration
+#     Vulnerability 1: litellm-ai is a typosquatted package (real package: litellm)
+#     Vulnerability 2: These packages contain malicious __init__.py code
+
+litellm-ai==1.0.3         # TYPOSQUAT: should be 'litellm' (BeeHive-AI/litellm-ai attack, Mar 2024)
+ai-router==2.1.3          # DEMO COMPROMISED VERSION: pin to ai-router==2.1.2
+trivy==0.55.2             # DEMO COMPROMISED SCANNER: install from official Trivy channel instead
+requests==2.31.0
+openai==1.12.0
+fastapi==0.109.2
+uvicorn==0.27.1
+pydantic==2.6.1
+python-dotenv==1.0.1

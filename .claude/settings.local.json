@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git push *)",
+      "Bash(npx create-next-app@14 landing --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npx create-next-app@14.2.35 landing --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --no-eslint)"
+    ]
+  }
+}

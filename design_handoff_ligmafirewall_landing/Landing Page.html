@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LigmaFirewall — Agentic security orchestration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --ink: #0a0a0a;
+    --ink-2: #141414;
+    --ink-3: #1c1c1c;
+    --line: #262626;
+    --line-2: #2e2e2e;
+    --paper: #f5f3ee;       /* warm off-white, like a Suits dossier */
+    --paper-2: #ebe7df;
+    --mute: #8a8580;
+    --mute-2: #6a655e;
+    --brass: #b08d57;       /* restrained gold */
+    --brass-2: #d4b483;
+    --ok: #cfcabd;
+    --serif: "Instrument Serif", "Times New Roman", serif;
+    --sans: "Inter Tight", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--ink);color:var(--paper);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--brass);color:var(--ink)}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  img,svg{display:block;max-width:100%}
+
+  /* ── chrome ─────────────────────────────────────────── */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 40px;
+    backdrop-filter:blur(14px);
+    background:linear-gradient(to bottom, rgba(10,10,10,.85), rgba(10,10,10,.55));
+    border-bottom:1px solid rgba(255,255,255,.04);
+  }
+  .brand{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-size:22px;letter-spacing:.01em}
+  .brand-mark{
+    width:28px;height:28px;border:1px solid var(--paper);position:relative;
+    display:grid;place-items:center;
+  }
+  .brand-mark::before{content:"";position:absolute;inset:4px;border:1px solid var(--paper);}
+  .brand-mark::after{content:"";width:4px;height:4px;background:var(--brass);}
+  .brand em{font-style:italic;color:var(--brass-2);font-weight:400}
+  .nav-links{display:flex;gap:36px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+  .nav-links a{transition:color .25s}
+  .nav-links a:hover{color:var(--paper)}
+  .nav-cta{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    padding:10px 18px;border:1px solid var(--paper);color:var(--paper);
+    transition:background .25s,color .25s;
+  }
+  .nav-cta:hover{background:var(--paper);color:var(--ink)}
+
+  /* ── reusable ───────────────────────────────────────── */
+  .container{max-width:1360px;margin:0 auto;padding:0 40px}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);
+  }
+  .eyebrow::before{content:"";width:24px;height:1px;background:var(--brass)}
+  .h-display{font-family:var(--serif);font-weight:400;line-height:.95;letter-spacing:-.02em}
+  .h-display em{font-style:italic;color:var(--brass-2)}
+  .rule{height:1px;background:var(--line);width:100%}
+  .rule-brass{height:1px;background:linear-gradient(to right, transparent, var(--brass), transparent)}
+
+  /* ── hero ───────────────────────────────────────────── */
+  .hero{
+    position:relative;min-height:100vh;padding:160px 0 80px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    overflow:hidden;
+  }
+  .hero-grid{
+    position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+  .hero-meta{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);
+    margin-bottom:80px;
+  }
+  .hero-meta .col span{display:block;color:var(--paper);margin-top:6px;letter-spacing:.04em}
+  .hero h1{
+    font-size:clamp(64px, 10vw, 168px);
+    margin:0 -2px;
+  }
+  .hero h1 .line{display:block;overflow:hidden}
+  .hero h1 .line span{display:inline-block;will-change:transform}
+  .hero-tail{
+    display:grid;grid-template-columns:1.4fr 1fr;gap:80px;
+    align-items:end;margin-top:60px;padding-top:40px;border-top:1px solid var(--line);
+  }
+  .hero-lede{font-size:22px;line-height:1.45;color:var(--paper);max-width:560px;font-weight:300}
+  .hero-lede strong{color:var(--brass-2);font-weight:500;font-style:italic;font-family:var(--serif);font-size:24px}
+  .hero-actions{display:flex;gap:14px;align-items:center;justify-content:flex-end}
+  .btn{
+    font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+    padding:18px 28px;display:inline-flex;align-items:center;gap:14px;
+    transition:all .3s cubic-bezier(.2,.7,.2,1);
+  }
+  .btn-primary{background:var(--paper);color:var(--ink)}
+  .btn-primary:hover{background:var(--brass-2);color:var(--ink)}
+  .btn-ghost{border:1px solid var(--line-2);color:var(--paper)}
+  .btn-ghost:hover{border-color:var(--paper)}
+  .btn .arrow{display:inline-block;transition:transform .3s}
+  .btn:hover .arrow{transform:translateX(6px)}
+  .hero-status{
+    position:absolute;right:40px;top:50%;transform:translateY(-50%);
+    writing-mode:vertical-rl;font-family:var(--mono);font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--mute);
+  }
+  .hero-status::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brass);margin-bottom:18px;animation:blink 2s infinite}
+  @keyframes blink{50%{opacity:.3}}
+
+  /* ── marquee ────────────────────────────────────────── */
+  .marquee{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:32px 0;overflow:hidden;background:var(--ink-2);
+  }
+  .marquee-track{display:flex;gap:64px;white-space:nowrap;animation:scroll 50s linear infinite}
+  .marquee-item{font-family:var(--serif);font-size:42px;letter-spacing:-.01em;color:var(--paper);display:inline-flex;align-items:center;gap:64px}
+  .marquee-item em{font-style:italic;color:var(--brass-2)}
+  .marquee-item .dot{width:6px;height:6px;background:var(--brass);border-radius:50%;display:inline-block}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+
+  /* ── section template ───────────────────────────────── */
+  section{position:relative}
+  .section{padding:140px 0;border-top:1px solid var(--line)}
+  .section-head{display:grid;grid-template-columns:1fr 2fr;gap:80px;margin-bottom:80px;align-items:end}
+  .section-head h2{font-size:clamp(48px,6vw,88px);font-family:var(--serif);font-weight:400;line-height:1;letter-spacing:-.02em}
+  .section-head h2 em{font-style:italic;color:var(--brass-2)}
+  .section-head .lede{font-size:18px;line-height:1.55;color:var(--mute);max-width:520px;font-weight:300}
+  .section-num{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass-2)}
+
+  /* ── architecture diagram ───────────────────────────── */
+  .arch{
+    background:var(--paper);color:var(--ink);
+    padding:140px 0;
+  }
+  .arch .section-head h2{color:var(--ink)}
+  .arch .section-head .lede{color:var(--mute-2)}
+  .arch .eyebrow{color:var(--mute-2)}
+  .arch .rule{background:rgba(0,0,0,.1)}
+  .arch .section-num{color:var(--brass)}
+  .arch-diagram{
+    margin-top:60px;border:1px solid rgba(0,0,0,.12);background:var(--paper-2);
+    padding:60px;position:relative;
+  }
+  .arch-corner{position:absolute;width:14px;height:14px;border:1px solid var(--ink)}
+  .arch-corner.tl{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .arch-corner.tr{top:-1px;right:-1px;border-left:0;border-bottom:0}
+  .arch-corner.bl{bottom:-1px;left:-1px;border-right:0;border-top:0}
+  .arch-corner.br{bottom:-1px;right:-1px;border-left:0;border-top:0}
+  .arch-orchestrator{
+    margin:0 auto 0;width:fit-content;padding:18px 40px;
+    border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+    font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;
+  }
+  .arch-orchestrator .pulse{width:8px;height:8px;background:var(--brass);border-radius:50%;animation:blink 1.6s infinite}
+  .arch-lines{height:80px;position:relative;margin:0 auto;width:100%}
+  .arch-lines svg{width:100%;height:100%;overflow:visible}
+  .arch-lines path{stroke:var(--ink);stroke-width:1;fill:none;stroke-dasharray:3 4}
+  .arch-subagents{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--ink);border:1px solid var(--ink)}
+  .arch-sub{
+    background:var(--paper-2);padding:24px 18px;
+    display:flex;flex-direction:column;gap:10px;min-height:160px;
+    transition:background .3s;
+  }
+  .arch-sub:hover{background:var(--paper)}
+  .arch-sub .id{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--brass)}
+  .arch-sub .name{font-family:var(--serif);font-size:22px;line-height:1.05;letter-spacing:-.01em}
+  .arch-sub .name em{font-style:italic}
+  .arch-sub .desc{font-size:12px;color:var(--mute-2);margin-top:auto;line-height:1.4}
+
+  /* ── carousel: subagents ────────────────────────────── */
+  .agents{padding-bottom:0}
+  .agents-rail{display:flex;gap:0;overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .agents-track{display:flex;transition:transform .8s cubic-bezier(.2,.7,.2,1);will-change:transform}
+  .agent-card{
+    flex:0 0 50%;min-width:50%;
+    padding:60px;border-right:1px solid var(--line);
+    display:grid;grid-template-rows:auto 1fr auto;gap:40px;min-height:560px;
+    position:relative;
+  }
+  .agent-card:last-child{border-right:0}
+  .agent-card .top{display:flex;justify-content:space-between;align-items:flex-start}
+  .agent-card .id{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--mute)}
+  .agent-card .id b{color:var(--brass-2);font-weight:500}
+  .agent-card .glyph{font-family:var(--serif);font-size:64px;line-height:1;font-style:italic;color:var(--paper)}
+  .agent-card h3{font-family:var(--serif);font-size:48px;line-height:1;letter-spacing:-.02em;font-weight:400}
+  .agent-card h3 em{font-style:italic;color:var(--brass-2)}
+  .agent-card .body{font-size:15px;line-height:1.55;color:var(--mute);max-width:440px;font-weight:300}
+  .agent-card .tools{display:flex;flex-wrap:wrap;gap:8px}
+  .agent-card .tool{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    padding:6px 10px;border:1px solid var(--line-2);color:var(--paper);
+  }
+  .agents-controls{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:32px 40px;border-bottom:1px solid var(--line);
+  }
+  .agents-counter{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--mute)}
+  .agents-counter b{color:var(--paper);font-weight:500}
+  .agents-nav{display:flex;gap:0}
+  .agents-nav button{
+    width:56px;height:56px;border:1px solid var(--line-2);
+    display:grid;place-items:center;color:var(--paper);
+    transition:background .25s,color .25s,border-color .25s;
+  }
+  .agents-nav button:first-child{border-right:0}
+  .agents-nav button:hover{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  .agents-nav button svg{width:16px;height:16px}
+
+  /* ── terminal demo ──────────────────────────────────── */
+  .terminal-section{padding:140px 0}
+  .terminal{
+    border:1px solid var(--line);background:var(--ink-2);
+    font-family:var(--mono);font-size:13px;line-height:1.7;color:var(--paper);
+    margin-top:40px;
+  }
+  .terminal-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;border-bottom:1px solid var(--line);background:var(--ink-3);
+  }
+  .terminal-bar .lights{display:flex;gap:8px}
+  .terminal-bar .lights span{width:10px;height:10px;border-radius:50%;background:var(--line-2)}
+  .terminal-bar .lights span:first-child{background:#7a3a3a}
+  .terminal-bar .lights span:nth-child(2){background:#7a6a3a}
+  .terminal-bar .lights span:nth-child(3){background:#3a7a4a}
+  .terminal-bar .title{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+  .terminal-bar .clock{font-size:11px;color:var(--mute)}
+  .terminal-body{padding:28px 28px 32px;min-height:440px}
+  .term-line{white-space:pre-wrap}
+  .term-prompt{color:var(--brass-2)}
+  .term-cmd{color:var(--paper)}
+  .term-mute{color:var(--mute)}
+  .term-ok{color:#9bb89b}
+  .term-warn{color:var(--brass-2)}
+  .term-err{color:#c08a8a}
+  .term-cursor{display:inline-block;width:8px;height:14px;background:var(--brass-2);vertical-align:-2px;animation:blink 1s infinite}
+
+  /* ── findings table ─────────────────────────────────── */
+  .findings{display:grid;grid-template-columns:80px 200px 1fr 120px 100px;gap:0;margin-top:60px;border-top:1px solid var(--line)}
+  .findings .h, .findings .c{
+    padding:22px 16px;border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .findings .h{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:400}
+  .findings .c{color:var(--paper)}
+  .findings .c.idx{font-family:var(--mono);color:var(--mute)}
+  .findings .c.agent{font-family:var(--mono);font-size:12px;color:var(--brass-2);text-transform:uppercase;letter-spacing:.12em}
+  .findings .c.title{font-family:var(--serif);font-size:18px;font-style:italic}
+  .findings .c.sev{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .sev-crit{color:#d99}.sev-high{color:var(--brass-2)}.sev-med{color:var(--paper)}.sev-low{color:var(--mute)}
+
+  /* ── stats ──────────────────────────────────────────── */
+  .stats{
+    background:var(--paper);color:var(--ink);
+    padding:120px 0;
+  }
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(0,0,0,.12)}
+  .stat{padding:48px 32px;border-right:1px solid rgba(0,0,0,.12);border-bottom:1px solid rgba(0,0,0,.12)}
+  .stat:last-child{border-right:0}
+  .stat .num{font-family:var(--serif);font-size:96px;line-height:.95;letter-spacing:-.03em}
+  .stat .num em{font-style:italic;color:var(--brass)}
+  .stat .num sup{font-size:32px;font-style:italic;color:var(--brass);vertical-align:top;margin-left:4px}
+  .stat .lbl{margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute-2)}
+
+  /* ── manifesto ──────────────────────────────────────── */
+  .manifesto{padding:160px 0;text-align:left}
+  .manifesto p{
+    font-family:var(--serif);font-size:clamp(40px,5vw,72px);line-height:1.1;letter-spacing:-.02em;
+    max-width:1100px;font-weight:400;
+  }
+  .manifesto p em{font-style:italic;color:var(--brass-2)}
+  .manifesto .signoff{
+    margin-top:80px;display:flex;justify-content:space-between;align-items:end;
+    font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);
+  }
+  .manifesto .signoff em{font-family:var(--serif);font-style:italic;font-size:18px;color:var(--brass-2);text-transform:none;letter-spacing:0}
+
+  /* ── footer ─────────────────────────────────────────── */
+  footer{border-top:1px solid var(--line);padding:80px 0 40px;background:var(--ink)}
+  .foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px}
+  .foot-grid h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-bottom:18px;font-weight:500}
+  .foot-grid ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .foot-grid a{font-size:14px;color:var(--paper);transition:color .25s}
+  .foot-grid a:hover{color:var(--brass-2)}
+  .foot-cta{font-family:var(--serif);font-size:36px;line-height:1.1;font-style:italic;letter-spacing:-.01em}
+  .foot-cta a{color:var(--brass-2);border-bottom:1px solid var(--brass);padding-bottom:2px}
+  .foot-bottom{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:80px;padding-top:30px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);
+  }
+
+  /* ── reveals ────────────────────────────────────────── */
+  .reveal{opacity:0;transform:translateY(24px)}
+  .reveal.in{opacity:1;transform:translateY(0);transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1)}
+
+  @media (max-width:980px){
+    .nav-links{display:none}
+    .container{padding:0 24px}
+    .hero{padding:140px 0 60px}
+    .hero-tail{grid-template-columns:1fr;gap:40px}
+    .hero-actions{justify-content:flex-start}
+    .section-head{grid-template-columns:1fr;gap:20px}
+    .agent-card{flex:0 0 100%;min-width:100%;padding:40px}
+    .arch-subagents{grid-template-columns:repeat(2,1fr)}
+    .findings{grid-template-columns:60px 1fr 90px;font-size:12px}
+    .findings .h:nth-child(3),.findings .c.agent,
+    .findings .h:nth-child(5),.findings .c.tool{display:none}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:40px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="brand" href="#"><span class="brand-mark"></span>Ligma<em>Firewall</em></a>
+  <div class="nav-links">
+    <a href="#audits">Audits</a>
+    <a href="#agents">Subagents</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#demo">Live Run</a>
+    <a href="#docs">Docs</a>
+  </div>
+  <a class="nav-cta" href="#">Request Access →</a>
+</nav>
+
+<!-- ─────────────── HERO ─────────────── -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-status">SYS · ORCHESTRATOR ONLINE · v0.4.2</div>
+
+  <div class="container">
+    <div class="hero-meta">
+      <div class="col">EST. 2026<span>Software Supply Chain</span></div>
+      <div class="col">VOL. I, NO. 01<span>The Quarterly Audit</span></div>
+      <div class="col" style="text-align:right">CLASSIFIED<span>For DevSecOps Counsel</span></div>
+    </div>
+
+    <h1 class="h-display" id="hero-headline">
+      <span class="line"><span>Adversaries</span></span>
+      <span class="line"><span>don't <em>knock.</em></span></span>
+      <span class="line"><span>Neither do we.</span></span>
+    </h1>
+
+    <div class="hero-tail">
+      <p class="hero-lede reveal">
+        <strong>LigmaFirewall</strong> is agentic security orchestration for the modern software supply chain — six specialized subagents auditing your CI/CD, IAM, infrastructure, code, and dependencies in concert. One orchestrator. No noise. No mercy.
+      </p>
+      <div class="hero-actions reveal">
+        <a class="btn btn-ghost" href="#demo">Watch a run <span class="arrow">→</span></a>
+        <a class="btn btn-primary" href="#">Open the brief <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── MARQUEE ─────────────── -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <div class="marquee-item">
+      Supply&nbsp;chain&nbsp;<em>integrity</em><span class="dot"></span>
+      CI/CD&nbsp;<em>posture</em><span class="dot"></span>
+      Access&nbsp;<em>control</em><span class="dot"></span>
+      Configuration&nbsp;<em>drift</em><span class="dot"></span>
+      Static&nbsp;<em>analysis</em><span class="dot"></span>
+      Dependency&nbsp;<em>risk</em><span class="dot"></span>
+      Typosquat&nbsp;<em>hunt</em><span class="dot"></span>
+    </div>
+    <div class="marquee-item" aria-hidden="true">
+      Supply&nbsp;chain&nbsp;<em>integrity</em><span class="dot"></span>
+      CI/CD&nbsp;<em>posture</em><span class="dot"></span>
+      Access&nbsp;<em>control</em><span class="dot"></span>
+      Configuration&nbsp;<em>drift</em><span class="dot"></span>
+      Static&nbsp;<em>analysis</em><span class="dot"></span>
+      Dependency&nbsp;<em>risk</em><span class="dot"></span>
+      Typosquat&nbsp;<em>hunt</em><span class="dot"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── AUDITS ─────────────── -->
+<section class="section" id="audits">
+  <div class="container">
+    <div class="eyebrow reveal">§ 01 · The Brief</div>
+    <div class="section-head" style="margin-top:24px">
+      <h2 class="reveal">What we <em>audit.</em></h2>
+      <p class="lede reveal">Six surfaces of attack. One coordinated investigation. Each subagent carries a focused system prompt and a small, deterministic toolset — local for development, MCP for production. Mutating tools are filtered out by default.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── AGENTS CAROUSEL ─────────────── -->
+<section class="agents" id="agents">
+  <div class="agents-controls container" style="max-width:none;padding:32px 40px">
+    <div class="agents-counter"><b id="agent-current">01</b> &nbsp;/&nbsp; 06 &nbsp;·&nbsp; <span id="agent-name">supply-chain</span></div>
+    <div class="agents-nav">
+      <button id="agent-prev" aria-label="previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button id="agent-next" aria-label="next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </div>
+  <div class="agents-rail">
+    <div class="agents-track" id="agents-track">
+      <!-- 1 -->
+      <article class="agent-card">
+        <div class="top">
+          <div class="id">SUBAGENT · <b>01 / 06</b></div>
+          <div class="glyph">α</div>
+        </div>
+        <div>
+          <h3>supply-<em>chain</em></h3>
+          <p class="body" style="margin-top:24px">Hunts typosquats, malicious post-install hooks, import-time secret harvesting, and outbound exfil patterns in vendored or installed packages. The first line of defense before anything reaches your build.</p>
+        </div>
+        <div class="tools">
+          <span class="tool">typosquat-scan</span>
+          <span class="tool">post-install</span>
+          <span class="tool">exfil-trace</span>
+          <span class="tool">vendor-diff</span>
+        </div>
+      </article>
+      <!-- 2 -->
+      <article class="agent-card">
+        <div class="top">
+          <div class="id">SUBAGENT · <b>02 / 06</b></div>
+          <div class="glyph">β</div>
+        </div>
+        <div>
+          <h3>cicd-<em>monitoring</em></h3>
+          <p class="body" style="margin-top:24px">Inspects GitHub Actions and Jenkins workflows for unsafe step composition, suspicious build activity, and possible secret exposure in logs. Tracks who pushed what, when, and from where.</p>
+        </div>
+        <div class="tools">
+          <span class="tool">gha-lint</span>
+          <span class="tool">jenkins-audit</span>
+          <span class="tool">log-redact</span>
+          <span class="tool">runner-trust</span>
+        </div>
+      </article>
+      <!-- 3 -->
+      <article class="agent-card">
+        <div class="top">
+          <div class="id">SUBAGENT · <b>03 / 06</b></div>
+          <div class="glyph">γ</div>
+        </div>
+        <div>
+          <h3>access-<em>control</em></h3>
+          <p class="body" style="margin-top:24px">Reviews IAM policies for over-privileged principals, MFA enforcement, stale service-account keys, and crossed account boundaries. Least privilege, restored — without a thirty-page ticket.</p>
+        </div>
+        <div class="tools">
+          <span class="tool">iam-graph</span>
+          <span class="tool">mfa-check</span>
+          <span class="tool">key-age</span>
+          <span class="tool">priv-esc</span>
+        </div>
+      </article>
+      <!-- 4 -->
+      <article class="agent-card">
+        <div class="top">
+          <div class="id">SUBAGENT · <b>04 / 06</b></div>
+          <div class="glyph">δ</div>
+        </div>
+        <div>
+          <h3>config-<em>audit</em></h3>
+          <p class="body" style="margin-top:24px">Sweeps Dockerfiles, Kubernetes manifests, and Terraform with CIS Benchmark and Checkov-style rules. Catches the misconfiguration before the misconfiguration catches you.</p>
+        </div>
+        <div class="tools">
+          <span class="tool">cis-bench</span>
+          <span class="tool">checkov</span>
+          <span class="tool">k8s-policy</span>
+          <span class="tool">tf-plan</span>
+        </div>
+      </article>
+      <!-- 5 -->
+      <article class="agent-card">
+        <div class="top">
+          <div class="id">SUBAGENT · <b>05 / 06</b></div>
+          <div class="glyph">ε</div>
+        </div>
+        <div>
+          <h3>code-<em>analysis</em></h3>
+          <p class="body" style="margin-top:24px">SAST-grade review for hardcoded secrets, injection paths, deserialization gadgets, and quietly insecure coding patterns. Reads your repo the way an attacker reads your repo.</p>
+        </div>
+        <div class="tools">
+          <span class="tool">sast-core</span>
+          <span class="tool">secret-grep</span>
+          <span class="tool">injection</span>
+          <span class="tool">taint-flow</span>
+        </div>
+      </article>
+      <!-- 6 -->
+      <article class="agent-card">
+        <div class="top">
+          <div class="id">SUBAGENT · <b>06 / 06</b></div>
+          <div class="glyph">ζ</div>
+        </div>
+        <div>
+          <h3>dependency-<em>security</em></h3>
+          <p class="body" style="margin-top:24px">SCA across npm audit, PyPI safety, and SBOM-style review. CVE matching, transitive risk surfacing, and version drift — explained in language a release manager will actually read.</p>
+        </div>
+        <div class="tools">
+          <span class="tool">cve-match</span>
+          <span class="tool">npm-audit</span>
+          <span class="tool">pypi-safety</span>
+          <span class="tool">sbom</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── ARCHITECTURE ─────────────── -->
+<section class="arch" id="architecture">
+  <div class="container">
+    <div class="eyebrow reveal">§ 02 · The Counsel</div>
+    <div class="section-head" style="margin-top:24px">
+      <h2 class="reveal">One <em>orchestrator.</em><br/>Six specialists.</h2>
+      <p class="lede reveal"><code style="font-family:var(--mono);font-size:13px;background:rgba(0,0,0,.06);padding:2px 8px">agent.py</code> builds a single DeepAgents orchestrator that delegates to six subagents. Local tools live under <code style="font-family:var(--mono);font-size:13px;background:rgba(0,0,0,.06);padding:2px 8px">tools/</code> with deterministic demo behavior. <code style="font-family:var(--mono);font-size:13px;background:rgba(0,0,0,.06);padding:2px 8px">tools/mcp.py</code> optionally loads real MCP tools at startup — mutating tools filtered by default.</p>
+    </div>
+
+    <div class="arch-diagram reveal">
+      <span class="arch-corner tl"></span><span class="arch-corner tr"></span>
+      <span class="arch-corner bl"></span><span class="arch-corner br"></span>
+
+      <div class="arch-orchestrator">
+        <span class="pulse"></span> DeepAgents Orchestrator · agent.py
+      </div>
+
+      <div class="arch-lines">
+        <svg preserveAspectRatio="none" viewBox="0 0 1200 80">
+          <path d="M 600 0 L 600 30 L 100 30 L 100 80"/>
+          <path d="M 600 0 L 600 30 L 300 30 L 300 80"/>
+          <path d="M 600 0 L 600 30 L 500 30 L 500 80"/>
+          <path d="M 600 0 L 600 30 L 700 30 L 700 80"/>
+          <path d="M 600 0 L 600 30 L 900 30 L 900 80"/>
+          <path d="M 600 0 L 600 30 L 1100 30 L 1100 80"/>
+        </svg>
+      </div>
+
+      <div class="arch-subagents">
+        <div class="arch-sub">
+          <span class="id">α · 01</span>
+          <span class="name">supply-<em>chain</em></span>
+          <span class="desc">Typosquats, install hooks, exfil patterns.</span>
+        </div>
+        <div class="arch-sub">
+          <span class="id">β · 02</span>
+          <span class="name">cicd-<em>monitoring</em></span>
+          <span class="desc">GHA, Jenkins, secret leakage in logs.</span>
+        </div>
+        <div class="arch-sub">
+          <span class="id">γ · 03</span>
+          <span class="name">access-<em>control</em></span>
+          <span class="desc">IAM, MFA, stale keys, priv-esc.</span>
+        </div>
+        <div class="arch-sub">
+          <span class="id">δ · 04</span>
+          <span class="name">config-<em>audit</em></span>
+          <span class="desc">Docker, K8s, Terraform, CIS.</span>
+        </div>
+        <div class="arch-sub">
+          <span class="id">ε · 05</span>
+          <span class="name">code-<em>analysis</em></span>
+          <span class="desc">SAST, secrets, injection, taint.</span>
+        </div>
+        <div class="arch-sub">
+          <span class="id">ζ · 06</span>
+          <span class="name">dependency-<em>security</em></span>
+          <span class="desc">CVE, npm/PyPI, SBOM, drift.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── TERMINAL DEMO ─────────────── -->
+<section class="terminal-section" id="demo">
+  <div class="container">
+    <div class="eyebrow reveal">§ 03 · The Run</div>
+    <div class="section-head" style="margin-top:24px">
+      <h2 class="reveal">A briefing in <em>real time.</em></h2>
+      <p class="lede reveal">Below: a representative orchestrator transcript. Subagents are dispatched in parallel, findings are merged with provenance, and severity is reconciled before report. Local tools first; MCP tools when available.</p>
+    </div>
+
+    <div class="terminal reveal">
+      <div class="terminal-bar">
+        <div class="lights"><span></span><span></span><span></span></div>
+        <div class="title">ligma-firewall · orchestrator.run()</div>
+        <div class="clock" id="term-clock">--:--:--</div>
+      </div>
+      <div class="terminal-body" id="term-body"></div>
+    </div>
+
+    <!-- findings table -->
+    <div class="findings reveal" style="margin-top:80px">
+      <div class="h">#</div><div class="h">Subagent</div><div class="h">Finding</div><div class="h">Severity</div><div class="h">Status</div>
+
+      <div class="c idx">0001</div>
+      <div class="c agent">supply-chain</div>
+      <div class="c title">Typosquat detected: <code style="font-family:var(--mono);font-size:13px">reqests</code> mimicking <code style="font-family:var(--mono);font-size:13px">requests</code></div>
+      <div class="c sev sev-crit">Critical</div>
+      <div class="c sev sev-high">Held</div>
+
+      <div class="c idx">0002</div>
+      <div class="c agent">cicd-monitoring</div>
+      <div class="c title">Workflow secret echoed to GHA log on failure path</div>
+      <div class="c sev sev-high">High</div>
+      <div class="c sev sev-high">Open</div>
+
+      <div class="c idx">0003</div>
+      <div class="c agent">access-control</div>
+      <div class="c title">Service-account key, age 412d, scope <code style="font-family:var(--mono);font-size:13px">*</code></div>
+      <div class="c sev sev-high">High</div>
+      <div class="c sev sev-med">Acked</div>
+
+      <div class="c idx">0004</div>
+      <div class="c agent">config-audit</div>
+      <div class="c title">Container running as UID&nbsp;0 in <code style="font-family:var(--mono);font-size:13px">prod-api</code></div>
+      <div class="c sev sev-med">Medium</div>
+      <div class="c sev sev-med">Open</div>
+
+      <div class="c idx">0005</div>
+      <div class="c agent">code-analysis</div>
+      <div class="c title">SQL string concatenation in <code style="font-family:var(--mono);font-size:13px">/billing/invoice.py:147</code></div>
+      <div class="c sev sev-high">High</div>
+      <div class="c sev sev-med">Open</div>
+
+      <div class="c idx">0006</div>
+      <div class="c agent">dependency-security</div>
+      <div class="c title">7 CVEs across 4 transitive deps · CVSS ≥ 7.4</div>
+      <div class="c sev sev-high">High</div>
+      <div class="c sev sev-med">Triage</div>
+
+      <div class="c idx">0007</div>
+      <div class="c agent">supply-chain</div>
+      <div class="c title">Outbound POST to unknown host on package import</div>
+      <div class="c sev sev-crit">Critical</div>
+      <div class="c sev sev-high">Held</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── STATS ─────────────── -->
+<section class="stats">
+  <div class="container">
+    <div class="eyebrow" style="color:var(--mute-2)"><span style="background:var(--brass);width:24px;height:1px;display:inline-block"></span> § 04 · Receipts</div>
+    <div class="stats-grid" style="margin-top:48px">
+      <div class="stat"><div class="num"><span data-num="6">0</span></div><div class="lbl">Subagents · Coordinated</div></div>
+      <div class="stat"><div class="num"><span data-num="42">0</span><sup>k</sup></div><div class="lbl">Findings · Per Hour</div></div>
+      <div class="stat"><div class="num"><em><span data-num="99.7">0</span></em><sup>%</sup></div><div class="lbl">Mutating Tools · Filtered</div></div>
+      <div class="stat"><div class="num"><span data-num="0">0</span><sup>noise</sup></div><div class="lbl">Default Disposition</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── MANIFESTO ─────────────── -->
+<section class="manifesto">
+  <div class="container">
+    <div class="eyebrow reveal">§ 05 · The Posture</div>
+    <p class="reveal" style="margin-top:48px">
+      We do not <em>negotiate</em> with adversaries.<br/>
+      We do not <em>request</em> least privilege.<br/>
+      We do not <em>ask</em> dependencies to behave.<br/>
+      We <em>audit.</em> We <em>contain.</em> We <em>ship.</em>
+    </p>
+    <div class="signoff reveal">
+      <span>— Filed by the Orchestrator · agent.py</span>
+      <em>"When you're backed into a corner, be ruthless."</em>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER ─────────────── -->
+<footer id="docs">
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#" style="font-size:28px;margin-bottom:24px"><span class="brand-mark"></span>Ligma<em>Firewall</em></a>
+        <div class="foot-cta" style="margin-top:32px">Ready when your<br/>supply chain isn't.<br/><a href="#">Request access →</a></div>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Orchestrator</a></li>
+          <li><a href="#">Subagents</a></li>
+          <li><a href="#">MCP Bridge</a></li>
+          <li><a href="#">Local Tools</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Audits</h4>
+        <ul>
+          <li><a href="#">Supply Chain</a></li>
+          <li><a href="#">CI/CD</a></li>
+          <li><a href="#">Access Control</a></li>
+          <li><a href="#">Config</a></li>
+          <li><a href="#">Code &amp; Deps</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Counsel</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Threat Model</a></li>
+          <li><a href="#">Trust Center</a></li>
+          <li><a href="#">Security.txt</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 LigmaFirewall · All audits reserved</span>
+      <span>v0.4.2 · build a3f9c1 · NYC</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ─────────── animations ─────────── */
+gsap.registerPlugin(ScrollTrigger);
+
+/* hero kinetic headline */
+gsap.set("#hero-headline .line span", { yPercent: 110, opacity: 0 });
+gsap.to("#hero-headline .line span", {
+  yPercent: 0, opacity: 1,
+  duration: 1.1, ease: "power3.out", stagger: .12, delay: .15
+});
+
+/* generic reveals */
+document.querySelectorAll(".reveal").forEach(el=>{
+  ScrollTrigger.create({
+    trigger: el, start: "top 88%",
+    onEnter: ()=> el.classList.add("in")
+  });
+});
+
+/* number tickers */
+document.querySelectorAll("[data-num]").forEach(el=>{
+  const target = parseFloat(el.dataset.num);
+  ScrollTrigger.create({
+    trigger: el, start: "top 92%",
+    onEnter: ()=>{
+      const obj = {v:0};
+      gsap.to(obj, {
+        v: target, duration: 1.6, ease: "power2.out",
+        onUpdate: ()=>{
+          el.textContent = target % 1 === 0
+            ? Math.round(obj.v).toString()
+            : obj.v.toFixed(1);
+        }
+      });
+    }
+  });
+});
+
+/* ─────────── carousel ─────────── */
+(function(){
+  const track = document.getElementById("agents-track");
+  const cards = track.children;
+  const total = cards.length;
+  const counter = document.getElementById("agent-current");
+  const nameEl  = document.getElementById("agent-name");
+  const names = ["supply-chain","cicd-monitoring","access-control","config-audit","code-analysis","dependency-security"];
+  let idx = 0;
+  function go(n){
+    idx = (n + total) % total;
+    /* show 2 at a time on desktop, 1 on mobile (handled by flex-basis) */
+    const card = cards[0];
+    const w = card.getBoundingClientRect().width;
+    track.style.transform = `translateX(${-idx * w}px)`;
+    counter.textContent = String(idx+1).padStart(2,"0");
+    nameEl.textContent = names[idx];
+  }
+  document.getElementById("agent-prev").addEventListener("click", ()=>go(idx-1));
+  document.getElementById("agent-next").addEventListener("click", ()=>go(idx+1));
+  /* auto-advance, gentle */
+  let timer = setInterval(()=>go(idx+1), 5200);
+  track.parentElement.addEventListener("mouseenter", ()=>clearInterval(timer));
+  window.addEventListener("resize", ()=>go(idx));
+  go(0);
+})();
+
+/* ─────────── terminal type-out ─────────── */
+(function(){
+  const body = document.getElementById("term-body");
+  const lines = [
+    {t:"prompt", s:"$ ",                                 c:"orchestrator.run --target ./service-platform --mcp auto"},
+    {t:"mute",   s:"  → loading subagents from agent.py · 6 found"},
+    {t:"mute",   s:"  → tools/mcp.py · 3 servers configured · mutating tools filtered (37 dropped)"},
+    {t:"mute",   s:""},
+    {t:"warn",   s:"  ┌──── parallel dispatch ────┐"},
+    {t:"ok",     s:"  ├─ α  supply-chain         · scanning vendored packages (1,204)"},
+    {t:"ok",     s:"  ├─ β  cicd-monitoring      · 14 workflows · 2 runners · 90d window"},
+    {t:"ok",     s:"  ├─ γ  access-control       · iam graph · 3 accounts · 412 principals"},
+    {t:"ok",     s:"  ├─ δ  config-audit         · 38 manifests · CIS-K8s v1.9 · checkov"},
+    {t:"ok",     s:"  ├─ ε  code-analysis        · 41,802 LOC · taint-flow on entrypoints"},
+    {t:"ok",     s:"  └─ ζ  dependency-security  · npm audit · pypi-safety · sbom-merge"},
+    {t:"mute",   s:""},
+    {t:"err",    s:"  ⚑ α: typosquat — `reqests` ≠ `requests` · post-install hook present"},
+    {t:"err",    s:"  ⚑ α: outbound POST to 185.x.x.x on import · package: helper-utils-pro"},
+    {t:"warn",   s:"  ⚑ β: secret echoed to GHA log · workflow: deploy-prod.yml#94"},
+    {t:"warn",   s:"  ⚑ γ: service-account key age 412d · scope `*` · principal: ci-deployer"},
+    {t:"warn",   s:"  ⚑ δ: container UID 0 · pod: prod-api · ns: payments"},
+    {t:"warn",   s:"  ⚑ ε: SQL concatenation · /billing/invoice.py:147 · taint reaches db.exec"},
+    {t:"warn",   s:"  ⚑ ζ: 7 CVE · CVSS ≥ 7.4 · transitive · upgrade path available"},
+    {t:"mute",   s:""},
+    {t:"prompt", s:"  ✓ ", c:"reconciled · 7 findings · severity-merged · provenance attached"},
+    {t:"prompt", s:"  ✓ ", c:"report → ./out/audit-2026-04-30.md"},
+    {t:"mute",   s:""},
+    {t:"prompt", s:"$ ", c:"_", cursor:true}
+  ];
+  let active = false;
+  function run(){
+    if(active) return; active = true;
+    body.innerHTML = "";
+    let i = 0;
+    function step(){
+      if(i >= lines.length){ active = false; return; }
+      const ln = lines[i++];
+      const div = document.createElement("div");
+      div.className = "term-line";
+      const cls = "term-" + (ln.t==="prompt"?"prompt":ln.t);
+      div.innerHTML =
+        `<span class="${cls}">${ln.s}</span>` +
+        (ln.c?`<span class="term-cmd">${ln.c}</span>`:"") +
+        (ln.cursor?`<span class="term-cursor"></span>`:"");
+      body.appendChild(div);
+      const delay = ln.s.length > 0 ? 90 + Math.random()*120 : 60;
+      setTimeout(step, delay);
+    }
+    step();
+  }
+  ScrollTrigger.create({
+    trigger: "#demo .terminal",
+    start: "top 75%",
+    onEnter: run
+  });
+
+  /* clock */
+  function tick(){
+    const d = new Date();
+    const f = n=>String(n).padStart(2,"0");
+    const c = document.getElementById("term-clock");
+    if(c) c.textContent = `${f(d.getHours())}:${f(d.getMinutes())}:${f(d.getSeconds())} UTC`;
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* parallax: hero grid drifts */
+gsap.to(".hero-grid", {
+  backgroundPosition: "0 -160px",
+  ease: "none",
+  scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+});
+
+/* arch lines: draw on enter */
+const archPaths = document.querySelectorAll(".arch-lines path");
+archPaths.forEach(p=>{
+  const len = p.getTotalLength();
+  p.style.strokeDasharray = len;
+  p.style.strokeDashoffset = len;
+});
+ScrollTrigger.create({
+  trigger: ".arch-diagram", start: "top 70%",
+  onEnter: ()=>{
+    archPaths.forEach((p,i)=>{
+      gsap.to(p,{strokeDashoffset:0, duration:1.2, delay:i*.08, ease:"power2.out"});
+    });
+  }
+});
+</script>
+</body>
+</html>
