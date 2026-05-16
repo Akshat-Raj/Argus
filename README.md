@@ -2,7 +2,7 @@
 
 Agentic security orchestration for software supply chain audits.
 
-LigmaFirewall coordinates specialized AI security subagents to inspect CI/CD
+Argus coordinates specialized AI security subagents to inspect CI/CD
 pipelines, infrastructure configuration, application code, dependencies, and
 access-control posture. It can run with local demo tools for development, and
 it can load real MCP tools at startup when the relevant MCP server configuration
