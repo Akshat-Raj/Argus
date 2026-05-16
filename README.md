@@ -181,7 +181,7 @@ uv run python -c 'from tools.supply_chain import check_supply_chain_risks; print
 Or ask the agent to scan:
 
 ```text
-Run a supply chain attack scan on /Users/shreyansh/Documents/ligma_firewall/demo_victim_repo
+Run a supply chain attack scan on /Users/shreyansh/Documents/Argus/demo_victim_repo
 ```
 
 ### Development Notes
