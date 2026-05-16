@@ -1,4 +1,4 @@
-## LigmaFirewall
+## Argus
 
 Agentic security orchestration for software supply chain audits.
 
